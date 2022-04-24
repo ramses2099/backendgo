@@ -1,6 +1,8 @@
 package db
 
-import "context"
+import (
+	"context"
+)
 
 const createAccount = `--name: CreateAccount :one
 INSERT INTO accounts(
@@ -125,5 +127,24 @@ WHERE id = $1
 func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, deleteAccount, id)
 	return err
+
+}
+
+const randomIdAccount = `-- name RandomAccountID: one
+SELECT id FROM accounts ORDER BY random() limit $1
+`
+
+type RamdonID struct {
+	ID int64 `json:"id"`
+}
+
+func (q *Queries) GetRandomAccountID(ctx context.Context, arg ListAccountsParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, randomIdAccount, arg.Limit)
+	var i RamdonID
+	err := row.Scan(
+		&i.ID,
+	)
+
+	return i.ID, err
 
 }

@@ -36,6 +36,10 @@ func RandomMoney() int64 {
 	return RandomInt(0, 1000)
 }
 
+func RandomAccountID() int64 {
+	return RandomInt(1, 14)
+}
+
 func RandomCurrency() string {
 	currenies := []string{"EUR", "USD", "DOM", "CAD"}
 	n := len(currenies)

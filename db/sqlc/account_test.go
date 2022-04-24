@@ -72,7 +72,7 @@ func TestUpdateAccount(t *testing.T) {
 
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteAccounts(t *testing.T) {
 	account := createRandomAccount(t)
 	err := testQueries.DeleteAccount(context.Background(), account.ID)
 	require.NoError(t, err)
@@ -100,4 +100,19 @@ func TestListAccounts(t *testing.T) {
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
 	}
+}
+
+func TestGetRandomAccountID(t *testing.T) {
+
+	limit := ListAccountsParams{
+		Limit:  1,
+		Offset: 0,
+	}
+	AccountID, err := testQueries.GetRandomAccountID(context.Background(), limit)
+	var AccountID2 int64 = 20
+	require.NoError(t, err)
+	require.NotEmpty(t, AccountID)
+
+	require.NotEqual(t, AccountID, AccountID2)
+
 }

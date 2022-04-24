@@ -10,19 +10,19 @@ INSERT INTO transfers (
 ) RETURNING id, from_account_id, to_account_id, amount, created_at
 `
 
-type CreateTransfer struct {
+type CreateTransferParams struct {
 	FromAccount int64 `json:"from_account_id"`
 	ToAccountID int64 `json:"to_account_id"`
 	Amount      int64 `json:"amount"`
 }
 
-func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransfer) (Transfer, error) {
+func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {
 	row := q.db.QueryRowContext(ctx, createTransfer, arg.FromAccount, arg.ToAccountID, arg.Amount)
 	var i Transfer
 	err := row.Scan(
 		&i.ID,
 		&i.FromAccount,
-		&i.FromAccount,
+		&i.ToAccountID,
 		&i.Amount,
 		&i.CreatedAt,
 	)
@@ -35,12 +35,12 @@ WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfer, error) {
-	row := q.db.QueryRowContext(ctx, getEntry, id)
+	row := q.db.QueryRowContext(ctx, getTransfer, id)
 	var i Transfer
 	err := row.Scan(
 		&i.ID,
 		&i.FromAccount,
-		&i.FromAccount,
+		&i.ToAccountID,
 		&i.Amount,
 		&i.CreatedAt,
 	)
@@ -60,7 +60,7 @@ type ListTransfersParams struct {
 }
 
 func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfer, error) {
-	rows, err := q.db.QueryContext(ctx, listEntries, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listTransfers, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([
 		if err := rows.Scan(
 			&i.ID,
 			&i.FromAccount,
-			&i.FromAccount,
+			&i.ToAccountID,
 			&i.Amount,
 			&i.CreatedAt,
 		); err != nil {
@@ -92,22 +92,22 @@ func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([
 const updateTranfer = `-- name: UpdateTranfer :one
 UPDATE transfers
 SET amount = $2
-WHERE account_id = $1
+WHERE id = $1
 RETURNING id, from_account_id, to_account_id, amount, created_at
 `
 
 type UpdateTranferParams struct {
-	AccountID int64 `json:"account_id"`
-	Amount    int64 `json:"Amount"`
+	ID     int64 `json:"id"`
+	Amount int64 `json:"amount"`
 }
 
 func (q *Queries) UpdateTranfer(ctx context.Context, arg UpdateTranferParams) (Transfer, error) {
-	row := q.db.QueryRowContext(ctx, updateTranfer, arg.AccountID, arg.Amount)
+	row := q.db.QueryRowContext(ctx, updateTranfer, arg.ID, arg.Amount)
 	var i Transfer
 	err := row.Scan(
 		&i.ID,
 		&i.FromAccount,
-		&i.FromAccount,
+		&i.ToAccountID,
 		&i.Amount,
 		&i.CreatedAt,
 	)

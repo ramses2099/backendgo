@@ -10,12 +10,12 @@ INSERT INTO entries (
 ) RETURNING id, account_id,amount, created_at
 `
 
-type CreateEntry struct {
+type CreateEntryParams struct {
 	AccountID int64 `json:"account_id"`
 	Amount    int64 `json:"Amount"`
 }
 
-func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntry) (Entry, error) {
+func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
 	row := q.db.QueryRowContext(ctx, createEntry, arg.AccountID, arg.Amount)
 	var i Entry
 	err := row.Scan(
@@ -88,17 +88,17 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 const updateEntry = `-- name: UpdateEntry :one
 UPDATE entries
 SET amount = $2
-WHERE account_id = $1
+WHERE id = $1
 RETURNING id, account_id, amount, created_at
 `
 
 type UpdateEntryParams struct {
-	AccountID int64 `json:"account_id"`
-	Amount    int64 `json:"Amount"`
+	ID     int64 `json:"id"`
+	Amount int64 `json:"amount"`
 }
 
 func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry, error) {
-	row := q.db.QueryRowContext(ctx, updateEntry, arg.AccountID, arg.AccountID)
+	row := q.db.QueryRowContext(ctx, updateEntry, arg.ID, arg.Amount)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
